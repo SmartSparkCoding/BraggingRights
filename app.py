@@ -20,7 +20,7 @@ def up():
         return jsonify({
               "status": "online",
               "service": "Bragging Rights, Owned by Jacob Navaratne",
-              "version" commit,
+              "version": commit,
               "last_updated": datetime.datetime.now(datetime.UTC).isoformat(),
               "environment": "production"
         })
