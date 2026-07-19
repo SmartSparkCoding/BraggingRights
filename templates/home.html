@@ -1,9 +1,39 @@
 <!doctype html>
 <html lang="en">
-  <title>Home - Bragging Rights</title>
-</html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home - Bragging Rights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css')}}" />
+  </head>
 
-<body>
-  <h1>Welcome to Bragging Rights!</h1>
-  <h2>This is a test to check auto-deployment!</h2>
-</body>
+  <body>
+    <main class="container">
+      <header class="header">
+        <img
+          src="{{ url_for('static', filename='logo.png')}}"
+          alt="Bragging Rights Logo"
+          class="logo"
+        />
+      </header>
+      <section class="stats">
+        <div class="card">
+          <h2>Games Played</h2>
+          <p>0</p>
+        </div>
+        <div class="card">
+          <h2>Most Game Played</h2>
+          <p>None</p>
+        </div>
+        <div class="card">
+          <h2>Current Leader</h2>
+          <p>No-one</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <button class="login-button">Log In</button>
+      </footer>
+    </main>
+  </body>
+</html>
