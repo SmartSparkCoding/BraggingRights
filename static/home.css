@@ -84,7 +84,7 @@ body {
   padding: 18px;
   border-radius: 18px;
   border: none;
-  background: #111;
+  background: linear-gradient(to right, #ffd54a, #a855f7);
   color: white;
   font-size: 1.1rem;
   font-weight: 600;

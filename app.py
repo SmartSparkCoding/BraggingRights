@@ -1,4 +1,4 @@
-from flask import Flask, app, render_template, jsonify, Response
+from flask import Flask, app, render_template, jsonify, Response, request
 import json
 from feedgen.feed import FeedGenerator
 import subprocess 
@@ -6,9 +6,48 @@ import datetime
 
 app = Flask(__name__)
 
+profiles = {
+     "sarah": {
+          "name": "Sarah",
+          "pin": "2302"
+     },
+     "leroy": {
+          "name": "Leroy",
+          "pin": "1105"
+     },
+     "jacob": {
+          "name": "Jacob",
+          "pin": "2905"
+     },
+     "ollie": {
+          "name": "Ollie",
+          "pin": "1502"
+     },
+     "grannie_grandad": {
+          "name": "Grannie + Grandad",
+          "pin": "1948"
+     }
+}
+
 @app.route('/')
 def index():
         return render_template('home.html')
+
+@app.route('/profile-selector')
+def profile_selector():
+        return render_template('profile-selector.html')
+
+@app.route('/pin')
+def pin():
+    profile_id = request.args.get("profile")
+    if profile_id not in profiles:
+        return "Profile not found", 404
+    
+    profile = profiles[profile_id]
+
+    return render_template("pin.html", profile_id=profile_id, profile_name=profile["name"])
+
+
 
 @app.route("/up")
 def up():

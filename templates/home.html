@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home - Bragging Rights</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css')}}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css')}}"
+    />
   </head>
 
   <body>
@@ -32,7 +36,12 @@
       </section>
 
       <footer class="footer">
-        <button class="login-button">Log In</button>
+        <button
+          class="login-button"
+          onclick="window.location.href='{{ url_for('profile_selector') }}'"
+        >
+          Log In
+        </button>
       </footer>
     </main>
   </body>

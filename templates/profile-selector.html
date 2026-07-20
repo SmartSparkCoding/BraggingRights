@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile Selector - Bragging Rights</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='profile-selector.css')}}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css')}}"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <img
+          src="{{ url_for('static', filename='logo.png')}}"
+          alt="Bragging Rights Logo"
+          class="logo"
+        />
+      </header>
+
+      <h1 class="title">Profile Selector</h1>
+
+      <section class="profile-selector">
+        <a href="{{ url_for('pin', profile='sarah') }}" class="card">Sarah</a>
+        <a href="{{ url_for('pin', profile='leroy') }}" class="card">Leroy</a>
+        <a href="{{ url_for('pin', profile='jacob') }}" class="card">Jacob</a>
+        <a href="{{ url_for('pin', profile='ollie') }}" class="card">Ollie</a>
+        <a href="{{ url_for('pin', profile='grannie_grandad') }}" class="card"
+          >Grannie + Grandad</a
+        >
+      </section>
+    </main>
+  </body>
+</html>

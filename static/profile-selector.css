@@ -1,0 +1,66 @@
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #460088;
+}
+
+.profile-selector {
+  width: 95%;
+  max-width: 700px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.card {
+  background: linear-gradient(to right, #ffd54a, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border: 1px solid #eeeeee;
+  border-radius: 22px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.card:last-child {
+  grid-column: 1 / -1;
+  min-height: 160px;
+}
+
+@media (min-width: 769px) {
+  .profile-selector {
+    max-width: 900px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card {
+    min-height: 200px;
+  }
+
+  .card:last-child {
+    grid-column: auto;
+    min-height: 200px;
+  }
+}
