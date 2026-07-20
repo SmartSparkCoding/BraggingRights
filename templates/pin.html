@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ profile_name }} Log In - Bragging Rights</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='pin.css') }}" />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="header">
+        <img
+          src="{{ url_for('static', filename='logo.png') }}"
+          alt="Bragging Rights Logo"
+          class="logo"
+        />
+      </header>
+
+      <section class="pin-card">
+        <h1 class="title">{{ profile_name }}</h1>
+        <p class="subtitle">Enter your PIN to continue...</p>
+        <form method="POST">
+          <input
+            class="pin-input"
+            type="password"
+            name="pin"
+            maxlength="4"
+            inputmode="numeric"
+            placeholder="••••"
+            required
+          />
+          {% if error %}
+          <p class="error">{{ error }}</p>
+          {% endif %}
+          <button class="pin-button" type="submit">Continue</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

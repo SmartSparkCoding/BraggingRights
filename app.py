@@ -1,52 +1,74 @@
-from flask import Flask, app, render_template, jsonify, Response, request
+from flask import Flask, render_template, jsonify, Response, request
 import json
 from feedgen.feed import FeedGenerator
-import subprocess 
+import subprocess
 import datetime
 
 app = Flask(__name__)
 
 profiles = {
-     "sarah": {
-          "name": "Sarah",
-          "pin": "2302"
-     },
-     "leroy": {
-          "name": "Leroy",
-          "pin": "1105"
-     },
-     "jacob": {
-          "name": "Jacob",
-          "pin": "2905"
-     },
-     "ollie": {
-          "name": "Ollie",
-          "pin": "1502"
-     },
-     "grannie_grandad": {
-          "name": "Grannie + Grandad",
-          "pin": "1948"
-     }
+    "sarah": {
+        "name": "Sarah",
+        "pin": "2302"
+    },
+    "leroy": {
+        "name": "Leroy",
+        "pin": "1105"
+    },
+    "jacob": {
+        "name": "Jacob",
+        "pin": "2905"
+    },
+    "ollie": {
+        "name": "Ollie",
+        "pin": "1502"
+    },
+    "grannie_grandad": {
+        "name": "Grannie + Grandad",
+        "pin": "1948"
+    }
 }
+
 
 @app.route('/')
 def index():
-        return render_template('home.html')
+    return render_template('home.html')
+
 
 @app.route('/profile-selector')
 def profile_selector():
-        return render_template('profile-selector.html')
+    return render_template('profile-selector.html')
 
-@app.route('/pin')
+
+@app.route('/pin', methods=["GET", "POST"])
 def pin():
     profile_id = request.args.get("profile")
+
     if profile_id not in profiles:
         return "Profile not found", 404
-    
+
     profile = profiles[profile_id]
 
-    return render_template("pin.html", profile_id=profile_id, profile_name=profile["name"])
+    error = None
 
+    if request.method == "POST":
+        entered_pin = request.form["pin"]
+
+        if entered_pin == profile["pin"]:
+            return render_template(
+                "profile.html",
+                profile_name=profile["name"]
+            )
+
+        else:
+            error = "Incorrect PIN"
+
+    return render_template(
+        "pin.html",
+        profile_id=profile_id,
+        profile_name=profile["name"],
+        error=error
+    )
 
 
 @app.route("/up")
@@ -66,6 +88,7 @@ def up():
         "last_updated": datetime.datetime.now(datetime.UTC).isoformat(),
         "environment": "production"
     })
+
 
 @app.route("/updates.xml")
 def updates():
@@ -107,5 +130,10 @@ def updates():
         mimetype="application/rss+xml"
     )
 
+
 if __name__ == '__main__':
-    app.run(debug=True, port=7834, host="0.0.0.0")
+    app.run(
+        debug=True,
+        port=7834,
+        host="0.0.0.0"
+    )
