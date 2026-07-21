@@ -3,8 +3,11 @@ import json
 from feedgen.feed import FeedGenerator
 import subprocess
 import datetime
+from database import init_db, get_home_stats
 
 app = Flask(__name__)
+
+init_db()
 
 profiles = {
     "sarah": {
@@ -32,7 +35,12 @@ profiles = {
 
 @app.route('/')
 def index():
-    return render_template('home.html')
+    stats = get_home_stats()
+
+    return render_template(
+        'home.html',
+        stats=stats
+    )
 
 
 @app.route('/profile-selector')

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - Bragging Rights</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='profile.css')}}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css')}}"
+    />
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="header">
+        <a href="/profile-selector"
+          ><img
+            style="
+              position: absolute;
+              top: 10px;
+              left: 10px;
+              border: 0;
+              width: 256px;
+              z-index: 999;
+            "
+            src="{{ url_for('static', filename='logo.png')}}"
+            alt="Bragging Rights Logo"
+        /></a>
+      </header>
+    </main>
+  </body>
+</html>
