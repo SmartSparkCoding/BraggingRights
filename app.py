@@ -14,7 +14,11 @@ from feedgen.feed import FeedGenerator
 import subprocess
 import datetime
 
-from database import init_db, get_home_stats
+from database import (
+    init_db,
+    get_home_stats,
+    should_blur_general_stats
+)
 from leaderboard import get_player_global_stats
 
 
@@ -54,9 +58,12 @@ def index():
 
     stats = get_home_stats()
 
+    blur_general_stats = should_blur_general_stats()
+
     return render_template(
         "home.html",
-        stats=stats
+        stats=stats,
+        blur_general_stats=blur_general_stats
     )
 
 
@@ -132,14 +139,15 @@ def profile(profile_id):
     )
 
     return render_template(
-        "profile.html",
-        profile_id=profile_id,
-        profile_name=profile_data["name"],
-        profile_stats=profile_stats,
-        stats=get_home_stats(),
-        recent_games=profile_stats["games"],
-        game_stats=[]
-    )
+    "profile.html",
+    profile_id=profile_id,
+    profile_name=profile_data["name"],
+    profile_stats=profile_stats,
+    stats=get_home_stats(),
+    recent_games=profile_stats["games"],
+    game_stats=[],
+    blur_general_stats=should_blur_general_stats()
+)
 
 @app.route("/add-game")
 def add_game():

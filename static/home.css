@@ -123,3 +123,9 @@ body {
     width: 400px;
   }
 }
+
+.blurred-stat {
+  filter: blur(8px);
+  user-select: none;
+  pointer-events: none;
+}

@@ -277,7 +277,7 @@ for game in games:
 competition_id = create_competition(
     name="Summer Bragging Rights",
     start_date="2026-07-01",
-    end_date="2026-07-31"
+    end_date="2026-07-22"
 )
 
 
@@ -309,7 +309,7 @@ add_competition_goal(
 competition_id_2 = create_competition(
     name="July Game Master",
     start_date="2026-07-01",
-    end_date="2026-07-31"
+    end_date="2026-07-22"
 )
 
 

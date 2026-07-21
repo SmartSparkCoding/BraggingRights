@@ -20,20 +20,37 @@
           class="logo"
         />
       </header>
-      <section class="stats">
+      <section
+        class="stats {% if blur_general_stats %}stats-blurred{% endif %}"
+      >
         <div class="card">
           <h2>Games Played</h2>
+
+          {% if blur_general_stats %}
+          <p class="blurred-stat">???</p>
+          {% else %}
           <p>{{ stats.games_played }}</p>
+          {% endif %}
         </div>
 
         <div class="card">
           <h2>Most Game Played</h2>
+
+          {% if blur_general_stats %}
+          <p class="blurred-stat">???</p>
+          {% else %}
           <p>{{ stats.most_played }}</p>
+          {% endif %}
         </div>
 
         <div class="card">
           <h2>Current Leader</h2>
+
+          {% if blur_general_stats %}
+          <p class="blurred-stat">???</p>
+          {% else %}
           <p>{{ stats.current_leader }}</p>
+          {% endif %}
         </div>
       </section>
 

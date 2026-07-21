@@ -1,6 +1,7 @@
 import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
+from datetime import date, timedelta
 
 
 DATABASE_PATH = Path(__file__).parent / "bragging_rights.db"
@@ -408,3 +409,32 @@ def get_home_stats():
                 else "No-one"
             )
         }
+
+def should_blur_general_stats():
+    today = date.today()
+
+    with get_db() as db:
+        competition = db.execute("""
+            SELECT *
+            FROM competitions
+            WHERE start_date <= ?
+              AND end_date >= ?
+            ORDER BY end_date ASC
+            LIMIT 1
+        """, (
+            today.isoformat(),
+            today.isoformat()
+        )).fetchone()
+
+    if competition is None:
+        return False
+
+    end_date = date.fromisoformat(
+        competition["end_date"]
+    )
+
+    days_remaining = (
+        end_date - today
+    ).days
+
+    return 0 <= days_remaining <= 3

@@ -32,16 +32,22 @@
         <div class="stats-grid">
           <div class="stat-card">
             <span class="stat-label"> Games Played </span>
-            <strong> {{ stats.games_played }} </strong>
+            <strong class="{% if blur_general_stats %}blurred-stat{% endif %}">
+              {{ stats.games_played }}
+            </strong>
           </div>
 
           <div class="stat-card">
             <span class="stat-label"> Current Leader </span>
-            <strong> {{ stats.current_leader }} </strong>
+            <strong class="{% if blur_general_stats %}blurred-stat{% endif %}">
+              {{ stats.current_leader }}
+            </strong>
           </div>
           <div class="stat-card">
             <span class="stat-label"> Most Played Game </span>
-            <strong> {{ stats.most_played }} </strong>
+            <strong class="{% if blur_general_stats %}blurred-stat{% endif %}">
+              {{ stats.most_played }}
+            </strong>
           </div>
         </div>
       </section>
