@@ -17,7 +17,9 @@ import datetime
 from database import (
     init_db,
     get_home_stats,
-    should_blur_general_stats
+    should_blur_general_stats,
+    get_all_games,
+    get_active_competitions
 )
 from leaderboard import get_player_global_stats
 
@@ -72,6 +74,38 @@ def profile_selector():
 
     return render_template(
         "profile-selector.html"
+    )
+
+@app.route("/admin")
+def admin():
+
+    stats = get_home_stats()
+
+    game_types = get_all_games()
+
+    today = datetime.date.today().isoformat()
+
+    active_competitions = get_active_competitions(
+        today
+    )
+
+    competitions = [
+        {
+            "id": competition["id"],
+            "name": competition["name"],
+            "start_date": competition["start_date"],
+            "end_date": competition["end_date"],
+            "active": True
+        }
+        for competition in active_competitions
+    ]
+
+    return render_template(
+        "admin.html",
+        stats=stats,
+        game_types=game_types,
+        competitions=competitions,
+        profiles=profiles
     )
 
 
