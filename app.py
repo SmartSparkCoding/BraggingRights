@@ -15,6 +15,7 @@ import subprocess
 import datetime
 
 from database import init_db, get_home_stats
+from leaderboard import get_player_global_stats
 
 
 app = Flask(__name__)
@@ -117,7 +118,6 @@ def profile(profile_id):
     )
 
     if authenticated_profile != profile_id:
-
         return redirect(
             url_for(
                 "pin",
@@ -127,12 +127,23 @@ def profile(profile_id):
 
     profile_data = profiles[profile_id]
 
+    profile_stats = get_player_global_stats(
+        profile_data["name"]
+    )
+
     return render_template(
         "profile.html",
         profile_id=profile_id,
-        profile_name=profile_data["name"]
+        profile_name=profile_data["name"],
+        profile_stats=profile_stats,
+        stats=get_home_stats(),
+        recent_games=profile_stats["games"],
+        game_stats=[]
     )
 
+@app.route("/add-game")
+def add_game():
+    return render_template("add-game.html")
 
 @app.route("/logout")
 def logout():

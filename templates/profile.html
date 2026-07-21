@@ -3,34 +3,201 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile - Bragging Rights</title>
+    <title>{{ profile_name }} - Bragging Rights</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='profile.css')}}"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css')}}"
+      href="{{ url_for('static', filename='profile.css') }}"
     />
   </head>
-
   <body>
     <main class="container">
       <header class="header">
-        <a href="/profile-selector"
-          ><img
-            style="
-              position: absolute;
-              top: 10px;
-              left: 10px;
-              border: 0;
-              width: 256px;
-              z-index: 999;
-            "
-            src="{{ url_for('static', filename='logo.png')}}"
-            alt="Bragging Rights Logo"
-        /></a>
+        <img
+          src="https://cdn.hackclub.com/019f85d5-155c-7560-9e79-3bdb7126ec92/logo.png"
+          alt="Bragging Rights Logo"
+          class="logo"
+        />
+
+        <div class="profile-heading">
+          <p class="welcome">Welcome back</p>
+          <h1>{{ profile_name }}</h1>
+        </div>
       </header>
+
+      <section class="general-section">
+        <div class="section-heading">
+          <p class="section-label">BRAGGING RIGHTS</p>
+          <h2>General Stats</h2>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label"> Games Played </span>
+            <strong> {{ stats.games_played }} </strong>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label"> Current Leader </span>
+            <strong> {{ stats.current_leader }} </strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label"> Most Played Game </span>
+            <strong> {{ stats.most_played }} </strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="personal-section">
+        <div class="section-heading">
+          <p class="section-label">YOUR BRAGGING RIGHTS</p>
+          <h2>{{ profile_name }}'s Stats</h2>
+        </div>
+        <div class="personal-stats">
+          <div class="personal-stat">
+            <span> Total Points </span>
+            <strong> {{ profile_stats.total_points }} </strong>
+          </div>
+          <div class="personal-stat">
+            <span> Games Played </span>
+            <strong> {{ profile_stats.games_played }} </strong>
+          </div>
+          <div class="personal-stat">
+            <span> 1st Places </span>
+            <strong> {{ profile_stats.first_places }} </strong>
+          </div>
+
+          <div class="personal-stat">
+            <span> Average Score </span>
+            <strong>
+              {% if profile_stats.average_score is not none %} {{
+              "%.1f"|format(profile_stats.average_score) }} {% else %} — {%
+              endif %}
+            </strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="details-section">
+        <button
+          class="details-button"
+          type="button"
+          onclick="toggleSection('played-games', this)"
+        >
+          <span> Played Games </span><span class="arrow"> ↓ </span>
+        </button>
+        <div id="played-games" class="expandable">
+          {% if recent_games %}
+
+          <div class="game-list">
+            {% for game in recent_games %}
+
+            <div class="game-item">
+              <div class="game-info">
+                <strong> {{ game.game_name }} </strong>
+
+                <span> {{ game.played_at }} </span>
+              </div>
+
+              <div class="game-result">
+                <strong>
+                  {% if game.ranking == 1 %} 1st {% elif game.ranking == 2 %}
+                  2nd {% elif game.ranking == 3 %} 3rd {% else %} {{
+                  game.ranking }}th {% endif %}
+                </strong>
+
+                {% if game.score is not none %}
+
+                <span> {{ game.score }} points </span>
+
+                {% endif %}
+              </div>
+            </div>
+
+            {% endfor %}
+          </div>
+
+          {% else %}
+
+          <div class="empty-state">
+            <p>You haven't played any games yet.</p>
+          </div>
+
+          {% endif %}
+        </div>
+        <button
+          class="details-button"
+          type="button"
+          onclick="toggleSection('game-stats', this)"
+        >
+          <span> Game Stats </span>
+          <span class="arrow"> ↓ </span>
+        </button>
+
+        <div id="game-stats" class="expandable">
+          {% if game_stats %}
+
+          <div class="game-stats-list">
+            {% for game in game_stats %}
+
+            <div class="game-stat-item">
+              <div>
+                <strong> {{ game.name }} </strong>
+
+                <span> {{ game.games_played }} games played </span>
+              </div>
+
+              <div class="game-stat-value">
+                <span> Best Score </span>
+
+                <strong>
+                  {% if game.best_score is not none %} {{ game.best_score }} {%
+                  else %} — {% endif %}
+                </strong>
+              </div>
+            </div>
+
+            {% endfor %}
+          </div>
+
+          {% else %}
+
+          <div class="empty-state">
+            <p>No game statistics available yet.</p>
+          </div>
+
+          {% endif %}
+        </div>
+      </section>
+
+      <footer class="footer">
+        <a href="{{ url_for('add_game') }}" class="add-game-button">
+          <span> + </span>
+          Add Game Played
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="logout-button"> Log Out </a>
+      </footer>
     </main>
+
+    <script>
+      function toggleSection(sectionId, button) {
+        const section = document.getElementById(sectionId);
+
+        const isOpen = section.classList.contains("open");
+
+        document.querySelectorAll(".expandable").forEach(function (item) {
+          item.classList.remove("open");
+        });
+
+        document.querySelectorAll(".details-button").forEach(function (item) {
+          item.classList.remove("active");
+        });
+
+        if (!isOpen) {
+          section.classList.add("open");
+
+          button.classList.add("active");
+        }
+      }
+    </script>
   </body>
 </html>

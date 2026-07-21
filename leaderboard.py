@@ -437,7 +437,7 @@ def calculate_competition(
             "Competition not found"
         )
     
-    goals = get_competitio_goals(
+    goals = get_competition_goals(
         competition_id
     )
 
