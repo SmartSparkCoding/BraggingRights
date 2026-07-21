@@ -1,13 +1,28 @@
-from flask import Flask, render_template, jsonify, Response, request
+from flask import (
+    Flask,
+    render_template,
+    jsonify,
+    Response,
+    request,
+    redirect,
+    url_for,
+    session
+)
+
 import json
 from feedgen.feed import FeedGenerator
 import subprocess
 import datetime
+
 from database import init_db, get_home_stats
+
 
 app = Flask(__name__)
 
+app.secret_key = "my-name-is-jacoooooob-an-d-i-can-access-this-not-you"
+
 init_db()
+
 
 profiles = {
     "sarah": {
@@ -33,23 +48,28 @@ profiles = {
 }
 
 
-@app.route('/')
+@app.route("/")
 def index():
+
     stats = get_home_stats()
 
     return render_template(
-        'home.html',
+        "home.html",
         stats=stats
     )
 
 
-@app.route('/profile-selector')
+@app.route("/profile-selector")
 def profile_selector():
-    return render_template('profile-selector.html')
+
+    return render_template(
+        "profile-selector.html"
+    )
 
 
-@app.route('/pin', methods=["GET", "POST"])
+@app.route("/pin", methods=["GET", "POST"])
 def pin():
+
     profile_id = request.args.get("profile")
 
     if profile_id not in profiles:
@@ -60,15 +80,22 @@ def pin():
     error = None
 
     if request.method == "POST":
-        entered_pin = request.form["pin"]
+
+        entered_pin = request.form.get("pin", "")
 
         if entered_pin == profile["pin"]:
-            return render_template(
-                "profile.html",
-                profile_name=profile["name"]
+
+            session["authenticated_profile"] = profile_id
+
+            return redirect(
+                url_for(
+                    "profile",
+                    profile_id=profile_id
+                )
             )
 
         else:
+
             error = "Incorrect PIN"
 
     return render_template(
@@ -79,59 +106,139 @@ def pin():
     )
 
 
+@app.route("/profile/<profile_id>")
+def profile(profile_id):
+
+    if profile_id not in profiles:
+        return "Profile not found", 404
+
+    authenticated_profile = session.get(
+        "authenticated_profile"
+    )
+
+    if authenticated_profile != profile_id:
+
+        return redirect(
+            url_for(
+                "pin",
+                profile=profile_id
+            )
+        )
+
+    profile_data = profiles[profile_id]
+
+    return render_template(
+        "profile.html",
+        profile_id=profile_id,
+        profile_name=profile_data["name"]
+    )
+
+
+@app.route("/logout")
+def logout():
+
+    session.pop(
+        "authenticated_profile",
+        None
+    )
+
+    return redirect(
+        url_for("index")
+    )
+
+
 @app.route("/up")
 def up():
+
     try:
+
         commit = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],
+            [
+                "git",
+                "rev-parse",
+                "--short",
+                "HEAD"
+            ],
             cwd="/root/braggingrights"
         ).decode().strip()
+
     except:
+
         commit = "unknown"
 
     return jsonify({
         "status": "online",
         "service": "Bragging Rights, Owned by Jacob Navaratne",
         "version": commit,
-        "last_updated": datetime.datetime.now(datetime.UTC).isoformat(),
+        "last_updated": datetime.datetime.now(
+            datetime.UTC
+        ).isoformat(),
         "environment": "production"
     })
 
 
 @app.route("/updates.xml")
 def updates():
+
     fg = FeedGenerator()
 
-    fg.id("https://braggingrights.mini-jacob.hackclub.app")
-    fg.title("Bragging Rights Deployments")
+    fg.id(
+        "https://braggingrights.mini-jacob.hackclub.app"
+    )
+
+    fg.title(
+        "Bragging Rights Deployments"
+    )
+
     fg.link(
         href="https://braggingrights.mini-jacob.hackclub.app/updates.xml"
     )
-    fg.description("Automatic Bragging Rights deployment updates")
+
+    fg.description(
+        "Automatic Bragging Rights deployment updates"
+    )
 
     try:
-        with open("/root/braggingrights/deployments.json") as f:
+
+        with open(
+            "/root/braggingrights/deployments.json"
+        ) as f:
+
             deployments = json.load(f)
 
         for deployment in deployments:
+
             entry = fg.add_entry()
 
-            entry.id(deployment["commit"])
+            entry.id(
+                deployment["commit"]
+            )
+
             entry.title(
                 f"Deployment {deployment['commit']}"
             )
+
             entry.description(
                 deployment["message"]
             )
+
             entry.pubDate(
                 deployment["time"]
             )
 
     except Exception as e:
+
         entry = fg.add_entry()
+
         entry.id("error")
-        entry.title("RSS Error")
-        entry.description(str(e))
+
+        entry.title(
+            "RSS Error"
+        )
+
+        entry.description(
+            str(e)
+        )
 
     return Response(
         fg.rss_str(),
@@ -139,7 +246,8 @@ def updates():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     app.run(
         debug=True,
         port=7834,
