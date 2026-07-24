@@ -2,23 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, inital-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Admin - Bragging Rights</title>
+
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='admin.css') }}"
     />
   </head>
+
   <body>
     <main class="admin-container">
       <header class="admin-header">
         <div class="header-content">
-          <p class="eyebrow">BRAGGING RIGHTS</p>
           <h1>Admin Control Centre</h1>
+
           <p class="subtitle">
             Manage games, competitions, players and everything else in the app!
           </p>
         </div>
+
         <a href="{{ url_for('index') }}" class="back-button">
           ← Back to Home
         </a>
@@ -26,7 +30,6 @@
 
       <section class="overview-section">
         <div class="section-heading">
-          <p class="eyebrow">OVERVIEW</p>
           <h2>App at a glance</h2>
         </div>
 
@@ -35,14 +38,17 @@
             <span class="overview-label">Games Played</span>
             <strong>{{ stats.games_played }}</strong>
           </div>
+
           <div class="overview-card">
             <span class="overview-label">Game Types</span>
             <strong>{{ game_types|length }}</strong>
           </div>
+
           <div class="overview-card">
             <span class="overview-label">Competitions</span>
             <strong>{{ competitions|length }}</strong>
           </div>
+
           <div class="overview-card">
             <span class="overview-label">Current Leader</span>
             <strong>{{ stats.current_leader }}</strong>
@@ -52,16 +58,21 @@
 
       <section class="admin-section" id="games">
         <div class="section-heading">
-          <p class="eyebrow">GAME MANAGEMENT</p>
           <h2>Playable Games</h2>
         </div>
+
         <div class="management-card">
           <div class="management-header">
             <div>
               <h3>Game Types</h3>
               <p>These games can be selected when adding a played game.</p>
             </div>
-            <button type="button" class="small-primary-button">
+
+            <button
+              type="button"
+              class="small-primary-button"
+              data-open-modal="add-game-modal"
+            >
               + Add Game
             </button>
           </div>
@@ -78,18 +89,34 @@
                 <span>No description set.</span>
                 {% endif %}
               </div>
-              <div class="item-actions">
-                <button type="button" class="secondary-button">Edit</button>
-                <button type="button" class="danger-button">Delete</button>
-              </div>
 
-              {% else %}
-              <div class="empty-state">
-                <strong>No games added yet</strong>
-                <span>Add your first game to begin recording games.</span>
+              <div class="item-actions">
+                <button
+                  type="button"
+                  class="secondary-button"
+                  data-edit-game="{{ game.id }}"
+                  data-game-name="{{ game.name }}"
+                  data-game-description="{{ game.description or '' }}"
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="danger-button"
+                  data-delete-game="{{ game.id }}"
+                  data-game-name="{{ game.name }}"
+                >
+                  Delete
+                </button>
               </div>
             </div>
 
+            {% else %}
+            <div class="empty-state">
+              <strong>No games added yet</strong>
+              <span>Add your first game to begin recording games.</span>
+            </div>
             {% endfor %}
           </div>
         </div>
@@ -97,7 +124,6 @@
 
       <section class="admin-section" id="competitions">
         <div class="section-heading">
-          <p class="eyebrow">COMPETITION MANAGEMENT</p>
           <h2>Competitions</h2>
           <p>Manage competition dates, goals and prizes.</p>
         </div>
@@ -106,9 +132,14 @@
           <div class="management-header">
             <div>
               <h3>Competitions</h3>
-              <p>Active and previous competitions.</p>
+              <p>Active, upcoming and previous competitions.</p>
             </div>
-            <button type="button" class="small-primary-button">
+
+            <button
+              type="button"
+              class="small-primary-button"
+              data-open-modal="add-competition-modal"
+            >
               + New Competition
             </button>
           </div>
@@ -119,11 +150,10 @@
               <div class="competition-main">
                 <div class="competition-title">
                   <strong>{{ competition.name }}</strong>
-                  {% if competition.active %}
-                  <span class="status active"> Active </span>
-                  {% else %}
-                  <span class="status"> Finished </span>
-                  {% endif %}
+
+                  <span class="status {{ competition.status }}">
+                    {{ competition.status_label }}
+                  </span>
                 </div>
 
                 <span>
@@ -132,20 +162,31 @@
               </div>
 
               <div class="item-actions">
-                <button type="button" class="secondary-button">Manage</button>
-                <button type="button" class="danger-button">Delete</button>
+                <button
+                  type="button"
+                  class="secondary-button"
+                  data-manage-competition="{{ competition.id }}"
+                >
+                  Manage
+                </button>
+
+                <button
+                  type="button"
+                  class="danger-button"
+                  data-delete-competition="{{ competition.id }}"
+                  data-competition-name="{{ competition.name }}"
+                >
+                  Delete
+                </button>
               </div>
             </div>
-
             {% else %}
-
             <div class="empty-state">
               <strong>No competitions yet!</strong>
-              <span
-                >Create a competition to start tracking bragging rights!</span
-              >
+              <span>
+                Create a competition to start tracking bragging rights!
+              </span>
             </div>
-
             {% endfor %}
           </div>
         </div>
@@ -153,8 +194,6 @@
 
       <section class="admin-section" id="settings">
         <div class="section-heading">
-          <p class="eyebrow">CONFIG</p>
-
           <h2>App Settings</h2>
         </div>
 
@@ -162,12 +201,14 @@
           <div class="setting-row">
             <div>
               <strong>General Stats Lock</strong>
-              <span
-                >General statistics are hidden during the final 3 days of an
-                active competition.</span
-              >
+
+              <span>
+                General statistics are hidden during the final 3 days of an
+                active competition.
+              </span>
             </div>
-            <span class="setting-value"> 3 Days </span>
+
+            <span class="setting-value">3 Days</span>
           </div>
 
           <div class="setting-row">
@@ -175,26 +216,328 @@
               <strong>Application Status</strong>
               <span>Bragging Rights is currently operational.</span>
             </div>
-            <span class="status active"> Online </span>
+
+            <span class="status active">Online</span>
           </div>
         </div>
       </section>
 
       <section class="danger-zone">
         <div>
-          <p class="eyebrow">DANGER ZONE</p>
           <h2>Destructive Actions</h2>
         </div>
 
         <div class="danger-actions">
-          <button type="button" class="danger-button large">
+          <button type="button" class="danger-button large" data-clear-games>
             Delete All Played Games
           </button>
-          <button type="button" class="danger-button large">
+
+          <button type="button" class="danger-button large" data-reset-database>
             Reset Application Data
           </button>
         </div>
       </section>
     </main>
+
+    <div class="modal" id="add-game-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h2>Add Game Type</h2>
+            <p>Add a new game that can be recorded.</p>
+          </div>
+
+          <button type="button" class="modal-close" data-close-modal>×</button>
+        </div>
+
+        <form id="add-game-form">
+          <div class="form-group">
+            <label for="game-name">Game Name</label>
+
+            <input
+              id="game-name"
+              name="name"
+              type="text"
+              placeholder="e.g. Monopoly"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="game-description">Description</label>
+
+            <textarea
+              id="game-description"
+              name="description"
+              placeholder="Optional description"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="secondary-button" data-close-modal>
+              Cancel
+            </button>
+
+            <button type="submit" class="primary-submit">Add Game</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="edit-game-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h2>Edit Game Type</h2>
+            <p>Update the name or description of this game.</p>
+          </div>
+
+          <button type="button" class="modal-close" data-close-modal>×</button>
+        </div>
+
+        <form id="edit-game-form">
+          <input type="hidden" id="edit-game-id" />
+
+          <div class="form-group">
+            <label for="edit-game-name">Game Name</label>
+
+            <input id="edit-game-name" name="name" type="text" required />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-game-description">Description</label>
+
+            <textarea
+              id="edit-game-description"
+              name="description"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="secondary-button" data-close-modal>
+              Cancel
+            </button>
+
+            <button type="submit" class="primary-submit">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="add-competition-modal">
+      <div class="modal-content competition-modal-content">
+        <div class="modal-header">
+          <div>
+            <h2 id="competition-modal-title">New Competition</h2>
+            <p id="competition-modal-description">
+              Create a competition with one big goal and two smaller goals.
+            </p>
+          </div>
+
+          <button type="button" class="modal-close" data-close-modal>×</button>
+        </div>
+
+        <form id="add-competition-form">
+          <input type="hidden" id="competition-id" />
+
+          <div class="form-group">
+            <label for="competition-name">Competition Name</label>
+
+            <input
+              id="competition-name"
+              name="name"
+              type="text"
+              placeholder="e.g. Summer 2026"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="competition-start">Start Date</label>
+
+              <input
+                id="competition-start"
+                name="start_date"
+                type="date"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="competition-end">End Date</label>
+
+              <input
+                id="competition-end"
+                name="end_date"
+                type="date"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="goal-section big-goal-section">
+            <div class="goal-section-heading">
+              <div>
+                <span class="goal-label">BIG GOAL</span>
+                <h3>Main Competition Goal</h3>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="big-goal-name">Goal</label>
+
+              <select id="big-goal-name" required>
+                <option value="">Select the big goal</option>
+                {% for game in game_types %}
+                <option value="{{ game.name }}">{{ game.name }}</option>
+                {% endfor %}
+                <option value="Overall Ranking">Overall Ranking</option>
+                <option value="Most Games Played">Most Games Played</option>
+                <option value="Most First Places">Most First Places</option>
+                <option value="Highest Average Score">
+                  Highest Average Score
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="big-goal-game">Related Game</label>
+
+              <select id="big-goal-game">
+                <option value="">All games</option>
+                {% for game in game_types %}
+                <option value="{{ game.id }}">{{ game.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="big-goal-prize">Prize / Additional Information</label>
+
+              <input
+                id="big-goal-prize"
+                type="text"
+                placeholder="e.g. Winner gets £20"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="goal-section">
+            <div class="goal-section-heading">
+              <div>
+                <span class="goal-label">SMALLER GOALS</span>
+                <h3>Two Bonus Goals</h3>
+              </div>
+            </div>
+
+            <div class="small-goal-card">
+              <span class="small-goal-number">01</span>
+
+              <div class="form-group">
+                <label for="small-goal-1-name">Goal</label>
+
+                <select id="small-goal-1-name" required>
+                  <option value="">Select a goal</option>
+                  {% for game in game_types %}
+                  <option value="{{ game.name }}">{{ game.name }}</option>
+                  {% endfor %}
+                  <option value="Overall Ranking">Overall Ranking</option>
+                  <option value="Most Games Played">Most Games Played</option>
+                  <option value="Most First Places">Most First Places</option>
+                  <option value="Highest Average Score">
+                    Highest Average Score
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="small-goal-1-game">Related Game</label>
+
+                <select id="small-goal-1-game">
+                  <option value="">All games</option>
+                  {% for game in game_types %}
+                  <option value="{{ game.id }}">{{ game.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="small-goal-1-prize"
+                  >Prize / Additional Information</label
+                >
+
+                <input
+                  id="small-goal-1-prize"
+                  type="text"
+                  placeholder="e.g. Winner chooses next game"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="small-goal-card">
+              <span class="small-goal-number">02</span>
+
+              <div class="form-group">
+                <label for="small-goal-2-name">Goal</label>
+
+                <select id="small-goal-2-name" required>
+                  <option value="">Select a goal</option>
+                  {% for game in game_types %}
+                  <option value="{{ game.name }}">{{ game.name }}</option>
+                  {% endfor %}
+                  <option value="Overall Ranking">Overall Ranking</option>
+                  <option value="Most Games Played">Most Games Played</option>
+                  <option value="Most First Places">Most First Places</option>
+                  <option value="Highest Average Score">
+                    Highest Average Score
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="small-goal-2-game">Related Game</label>
+
+                <select id="small-goal-2-game">
+                  <option value="">All games</option>
+                  {% for game in game_types %}
+                  <option value="{{ game.id }}">{{ game.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="small-goal-2-prize"
+                  >Prize / Additional Information</label
+                >
+
+                <input
+                  id="small-goal-2-prize"
+                  type="text"
+                  placeholder="e.g. Winner gets a bonus point"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="secondary-button" data-close-modal>
+              Cancel
+            </button>
+
+            <button type="submit" class="primary-submit">
+              Create Competition
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
   </body>
 </html>

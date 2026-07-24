@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
-from datetime import date, timedelta
+from datetime import date
 
 
 DATABASE_PATH = Path(__file__).parent / "bragging_rights.db"
@@ -153,6 +153,27 @@ def add_game_type(name, description=None):
         return cursor.lastrowid
 
 
+def update_game_type(
+    game_id,
+    name,
+    description=None
+):
+    with get_db() as db:
+        cursor = db.execute("""
+            UPDATE game_list
+            SET
+                name = ?,
+                description = ?
+            WHERE id = ?
+        """, (
+            name,
+            description,
+            game_id
+        ))
+
+        return cursor.rowcount > 0
+
+
 def add_game_field(
     game_type_id,
     field_name,
@@ -229,7 +250,9 @@ def create_game(
 def create_competition(
     name,
     start_date,
-    end_date
+    end_date,
+    big_goal,
+    small_goals
 ):
     with get_db() as db:
         cursor = db.execute("""
@@ -245,7 +268,123 @@ def create_competition(
             end_date
         ))
 
-        return cursor.lastrowid
+        competition_id = cursor.lastrowid
+
+        db.execute("""
+            INSERT INTO competition_goals (
+                competition_id,
+                goal_type,
+                name,
+                prize,
+                game_type_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            competition_id,
+            "big",
+            big_goal["name"],
+            big_goal["prize"],
+            big_goal.get("game_type_id")
+        ))
+
+        for goal in small_goals:
+            db.execute("""
+                INSERT INTO competition_goals (
+                    competition_id,
+                    goal_type,
+                    name,
+                    prize,
+                    game_type_id
+                )
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                competition_id,
+                "small",
+                goal["name"],
+                goal["prize"],
+                goal.get("game_type_id")
+            ))
+
+        return competition_id
+
+
+def update_competition(
+    competition_id,
+    name,
+    start_date,
+    end_date,
+    big_goal,
+    small_goals
+):
+    with get_db() as db:
+        competition = db.execute("""
+            SELECT id
+            FROM competitions
+            WHERE id = ?
+        """, (
+            competition_id,
+        )).fetchone()
+
+        if competition is None:
+            return False
+
+        db.execute("""
+            UPDATE competitions
+            SET
+                name = ?,
+                start_date = ?,
+                end_date = ?
+            WHERE id = ?
+        """, (
+            name,
+            start_date,
+            end_date,
+            competition_id
+        ))
+
+        db.execute("""
+            DELETE FROM competition_goals
+            WHERE competition_id = ?
+        """, (
+            competition_id,
+        ))
+
+        db.execute("""
+            INSERT INTO competition_goals (
+                competition_id,
+                goal_type,
+                name,
+                prize,
+                game_type_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            competition_id,
+            "big",
+            big_goal["name"],
+            big_goal["prize"],
+            big_goal.get("game_type_id")
+        ))
+
+        for goal in small_goals:
+            db.execute("""
+                INSERT INTO competition_goals (
+                    competition_id,
+                    goal_type,
+                    name,
+                    prize,
+                    game_type_id
+                )
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                competition_id,
+                "small",
+                goal["name"],
+                goal["prize"],
+                goal.get("game_type_id")
+            ))
+
+        return True
 
 
 def add_competition_goal(
@@ -300,7 +439,12 @@ def get_competition_goals(competition_id):
             LEFT JOIN game_list
                 ON competition_goals.game_type_id = game_list.id
             WHERE competition_goals.competition_id = ?
-            ORDER BY competition_goals.id
+            ORDER BY
+                CASE competition_goals.goal_type
+                    WHEN 'big' THEN 1
+                    ELSE 2
+                END,
+                competition_goals.id
         """, (
             competition_id,
         )).fetchall()
@@ -312,7 +456,6 @@ def get_games_between_dates(
     game_type_id=None
 ):
     with get_db() as db:
-
         if game_type_id is not None:
             return db.execute("""
                 SELECT
@@ -357,7 +500,8 @@ def get_game_players(game_id):
         """, (
             game_id,
         )).fetchall()
-    
+
+
 def get_home_stats():
     with get_db() as db:
         games_played = db.execute("""
@@ -409,6 +553,7 @@ def get_home_stats():
                 else "No-one"
             )
         }
+
 
 def should_blur_general_stats():
     today = date.today()
