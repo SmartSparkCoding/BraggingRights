@@ -64,13 +64,172 @@ profiles = {
 
 @app.route("/")
 def index():
+
     stats = get_home_stats()
+
     blur_general_stats = should_blur_general_stats()
+
+    today = datetime.date.today().isoformat()
+
+    with get_db() as db:
+        competitions = db.execute("""
+            SELECT *
+            FROM competitions
+            WHERE start_date <= ?
+              AND end_date >= ?
+            ORDER BY end_date ASC
+        """, (
+            today,
+            today
+        )).fetchall()
+
+        leaderboard = db.execute("""
+            SELECT
+                player_name,
+                SUM(
+                    CASE ranking
+                        WHEN 1 THEN 5
+                        WHEN 2 THEN 4
+                        WHEN 3 THEN 3
+                        WHEN 4 THEN 2
+                        WHEN 5 THEN 1
+                        ELSE 0
+                    END
+                ) AS points,
+                COUNT(*) AS games_played
+            FROM game_players
+            GROUP BY player_name
+            ORDER BY points DESC, player_name ASC
+        """).fetchall()
+
+        prize_leaders = []
+
+        for competition in competitions:
+            goals = db.execute("""
+                SELECT
+                    competition_goals.*,
+                    game_list.name AS game_name
+                FROM competition_goals
+                LEFT JOIN game_list
+                    ON competition_goals.game_type_id = game_list.id
+                WHERE competition_goals.competition_id = ?
+                ORDER BY competition_goals.id
+            """, (
+                competition["id"],
+            )).fetchall()
+
+            competition_prizes = []
+
+            for goal in goals:
+                leader = None
+
+                if goal["goal_type"] == "overall":
+                    leader = db.execute("""
+                        SELECT
+                            game_players.player_name,
+                            SUM(
+                                CASE game_players.ranking
+                                    WHEN 1 THEN 5
+                                    WHEN 2 THEN 4
+                                    WHEN 3 THEN 3
+                                    WHEN 4 THEN 2
+                                    WHEN 5 THEN 1
+                                    ELSE 0
+                                END
+                            ) AS value
+                        FROM game_players
+                        JOIN games
+                            ON game_players.game_id = games.id
+                        WHERE games.played_at >= ?
+                          AND games.played_at <= ?
+                        GROUP BY game_players.player_name
+                        ORDER BY value DESC, game_players.player_name ASC
+                        LIMIT 1
+                    """, (
+                        competition["start_date"],
+                        competition["end_date"]
+                    )).fetchone()
+
+                elif goal["goal_type"] == "most_games":
+                    leader = db.execute("""
+                        SELECT
+                            game_players.player_name,
+                            COUNT(*) AS value
+                        FROM game_players
+                        JOIN games
+                            ON game_players.game_id = games.id
+                        WHERE games.played_at >= ?
+                          AND games.played_at <= ?
+                        GROUP BY game_players.player_name
+                        ORDER BY value DESC, game_players.player_name ASC
+                        LIMIT 1
+                    """, (
+                        competition["start_date"],
+                        competition["end_date"]
+                    )).fetchone()
+
+                elif goal["goal_type"] == "highest_score":
+                    leader = db.execute("""
+                        SELECT
+                            game_players.player_name,
+                            MAX(game_players.score) AS value
+                        FROM game_players
+                        JOIN games
+                            ON game_players.game_id = games.id
+                        WHERE games.played_at >= ?
+                          AND games.played_at <= ?
+                          AND (
+                              ? IS NULL
+                              OR games.game_type_id = ?
+                          )
+                        GROUP BY game_players.player_name
+                        ORDER BY value DESC, game_players.player_name ASC
+                        LIMIT 1
+                    """, (
+                        competition["start_date"],
+                        competition["end_date"],
+                        goal["game_type_id"],
+                        goal["game_type_id"]
+                    )).fetchone()
+
+                elif goal["goal_type"] == "most_first_places":
+                    leader = db.execute("""
+                        SELECT
+                            game_players.player_name,
+                            COUNT(*) AS value
+                        FROM game_players
+                        JOIN games
+                            ON game_players.game_id = games.id
+                        WHERE games.played_at >= ?
+                          AND games.played_at <= ?
+                          AND game_players.ranking = 1
+                        GROUP BY game_players.player_name
+                        ORDER BY value DESC, game_players.player_name ASC
+                        LIMIT 1
+                    """, (
+                        competition["start_date"],
+                        competition["end_date"]
+                    )).fetchone()
+
+                competition_prizes.append({
+                    "name": goal["name"],
+                    "prize": goal["prize"],
+                    "leader": leader["player_name"] if leader else "No leader yet",
+                    "value": leader["value"] if leader else 0
+                })
+
+            prize_leaders.append({
+                "competition": competition,
+                "prizes": competition_prizes
+            })
 
     return render_template(
         "home.html",
         stats=stats,
-        blur_general_stats=blur_general_stats
+        blur_general_stats=blur_general_stats,
+        competitions=competitions,
+        leaderboard=leaderboard,
+        prize_leaders=prize_leaders
     )
 
 

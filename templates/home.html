@@ -4,10 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home - Bragging Rights</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='home.css')}}" />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css')}}"
+      href="{{ url_for('static', filename='home.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
     />
   </head>
 
@@ -20,6 +23,7 @@
           class="logo"
         />
       </header>
+
       <section
         class="stats {% if blur_general_stats %}stats-blurred{% endif %}"
       >
@@ -53,6 +57,90 @@
           {% endif %}
         </div>
       </section>
+
+      {% if competitions %}
+      <section class="home-section">
+        <div class="section-heading">
+          <h2>Current Competitions</h2>
+          <p>Competitions happening right now.</p>
+        </div>
+
+        <div class="info-list">
+          {% for competition in competitions %}
+          <div class="info-item">
+            <div>
+              <strong>{{ competition.name }}</strong>
+              <span>
+                {{ competition.start_date }} → {{ competition.end_date }}
+              </span>
+            </div>
+
+            <span class="status active">Active</span>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      <section class="home-section">
+        <div class="section-heading">
+          <h2>Overall Leaderboard</h2>
+          <p>Current ranking points across all games.</p>
+        </div>
+
+        <div class="leaderboard">
+          {% for player in leaderboard[:5] %}
+          <div class="leaderboard-item">
+            <span class="leaderboard-position">{{ loop.index }}</span>
+
+            <div class="leaderboard-player">
+              <strong>{{ player.player_name }}</strong>
+              <span>{{ player.games_played }} games</span>
+            </div>
+
+            <strong class="leaderboard-points">
+              {{ player.points }} pts
+            </strong>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <strong>No games recorded yet</strong>
+            <span>Play some games to start the leaderboard.</span>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% if prize_leaders %}
+      <section class="home-section">
+        <div class="section-heading">
+          <h2>Prize Leaders</h2>
+          <p>Who is currently leading each competition prize.</p>
+        </div>
+
+        {% for competition_data in prize_leaders %}
+        <div class="prize-group">
+          <h3>{{ competition_data.competition.name }}</h3>
+
+          <div class="prize-list">
+            {% for prize in competition_data.prizes %}
+            <div class="prize-item">
+              <div>
+                <strong>{{ prize.name }}</strong>
+                <span>{{ prize.prize }}</span>
+              </div>
+
+              <div class="prize-leader">
+                <span>Currently leading</span>
+                <strong>{{ prize.leader }}</strong>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </section>
+      {% endif %}
 
       <footer class="footer">
         <button
