@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Game - Bragging Rights</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='add-game.css') }}"
+    />
+  </head>
+
+  <body>
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">Log a played game</p>
+        <h1>Add a Game Played</h1>
+        <p class="subtitle">
+          Pick the game type, set the date, then drag the fixed player cards
+          into the order they finished. Leave any unused rows marked as Not
+          Played so personal scores stay tied to the right profile.
+        </p>
+      </section>
+
+      {% if error %}
+      <section class="error-banner" role="alert">{{ error }}</section>
+      {% endif %}
+
+      <section class="form-card">
+        <form
+          class="game-form"
+          method="post"
+          action="{{ url_for('add_game') }}"
+        >
+          <div class="field">
+            <label for="game_type_id">Game Type</label>
+
+            <select id="game_type_id" name="game_type_id" required>
+              <option value="">Select a game</option>
+              {% for game in game_types %}
+              <option value="{{ game.id }}">{{ game.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="played_at">Date Played</label>
+
+            <input
+              id="played_at"
+              name="played_at"
+              type="date"
+              value="{{ played_at_value }}"
+              required
+            />
+          </div>
+
+          <section class="player-section">
+            <div class="section-heading">
+              <h2>Player Order</h2>
+              <p>
+                Drag the cards so the top one is first place. Tick Not Played
+                for anyone who was not in that game.
+              </p>
+            </div>
+
+            <div id="player-list" class="player-list">
+              {% for player in player_cards %}
+              <article
+                class="player-card"
+                draggable="true"
+                data-player-card
+                data-player-name="{{ player.name }}"
+              >
+                <button
+                  type="button"
+                  class="drag-handle"
+                  aria-label="Drag to reorder {{ player.name }}"
+                >
+                  ⋮⋮
+                </button>
+
+                <div class="player-card-header">
+                  <span class="position-badge">{{ loop.index }}</span>
+
+                  <div>
+                    <strong>{{ player.name }}</strong>
+                    <p>Drop this card where it belongs.</p>
+                  </div>
+                </div>
+
+                <div class="player-fields">
+                  <input
+                    type="hidden"
+                    data-field="name"
+                    name="player_{{ loop.index }}_name"
+                    value="{{ player.name }}"
+                  />
+
+                  <label class="inline-field">
+                    <span>Score</span>
+                    <input
+                      type="text"
+                      data-field="score"
+                      name="player_{{ loop.index }}_score"
+                      placeholder="Optional score"
+                      autocomplete="off"
+                    />
+                  </label>
+
+                  <label class="check-field">
+                    <input
+                      type="checkbox"
+                      data-field="not_played"
+                      name="player_{{ loop.index }}_not_played"
+                    />
+                    Not Played
+                  </label>
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+          </section>
+
+          <div class="actions">
+            <a href="{{ url_for('index') }}" class="secondary-button">Cancel</a>
+
+            <button type="submit" class="primary-button">Save Game</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const list = document.getElementById("player-list");
+
+        if (!list) {
+          return;
+        }
+
+        let draggedCard = null;
+
+        function syncPlayerFields() {
+          const cards = Array.from(list.querySelectorAll(".player-card"));
+
+          cards.forEach((card, index) => {
+            const position = index + 1;
+
+            card.dataset.position = String(position);
+
+            const badge = card.querySelector(".position-badge");
+            const dragHandle = card.querySelector(".drag-handle");
+            const playerName = card.dataset.playerName || "player";
+
+            if (badge) {
+              badge.textContent = String(position);
+            }
+
+            if (dragHandle) {
+              dragHandle.setAttribute(
+                "aria-label",
+                `Drag ${playerName} to place ${position}`,
+              );
+            }
+
+            card.querySelectorAll("[data-field]").forEach((input) => {
+              const fieldName = input.dataset.field;
+
+              if (fieldName) {
+                input.name = `player_${position}_${fieldName}`;
+              }
+            });
+          });
+        }
+
+        function getDragAfterElement(container, y) {
+          const draggableElements = [
+            ...container.querySelectorAll(".player-card:not(.dragging)"),
+          ];
+
+          return draggableElements.reduce(
+            (closest, child) => {
+              const box = child.getBoundingClientRect();
+              const offset = y - box.top - box.height / 2;
+
+              if (offset < 0 && offset > closest.offset) {
+                return { offset, element: child };
+              }
+
+              return closest;
+            },
+            { offset: Number.NEGATIVE_INFINITY, element: null },
+          ).element;
+        }
+
+        list.querySelectorAll(".player-card").forEach((card) => {
+          card.addEventListener("dragstart", () => {
+            draggedCard = card;
+            card.classList.add("dragging");
+          });
+
+          card.addEventListener("dragend", () => {
+            card.classList.remove("dragging");
+            draggedCard = null;
+            syncPlayerFields();
+          });
+        });
+
+        list.addEventListener("dragover", (event) => {
+          event.preventDefault();
+
+          const afterElement = getDragAfterElement(list, event.clientY);
+
+          if (!draggedCard) {
+            return;
+          }
+
+          if (afterElement == null) {
+            list.appendChild(draggedCard);
+          } else {
+            list.insertBefore(draggedCard, afterElement);
+          }
+        });
+
+        syncPlayerFields();
+      })();
+    </script>
+  </body>
+</html>

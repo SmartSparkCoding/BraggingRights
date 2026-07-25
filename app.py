@@ -19,6 +19,7 @@ from database import (
     get_home_stats,
     should_blur_general_stats,
     get_all_games,
+    create_game,
     add_game_type,
     update_game_type,
     create_competition,
@@ -918,9 +919,130 @@ def profile(profile_id):
     )
 
 
-@app.route("/add-game")
+@app.route(
+    "/add-game",
+    methods=["GET", "POST"]
+)
 def add_game():
-    return render_template("add-game.html")
+    game_types = get_all_games()
+    player_cards = [
+        {
+            "id": profile_id,
+            "name": profile["name"]
+        }
+        for profile_id, profile in profiles.items()
+    ]
+
+    if request.method == "POST":
+        game_type_id = request.form.get("game_type_id", "").strip()
+        played_at = request.form.get("played_at", "").strip()
+        allowed_player_names = {
+            player["name"]
+            for player in player_cards
+        }
+
+        if not game_type_id:
+            return render_template(
+                "add-game.html",
+                game_types=game_types,
+                player_cards=player_cards,
+                error="Please choose a game type.",
+                selected_game_type_id=game_type_id,
+                played_at_value=played_at
+            )
+
+        if not played_at:
+            return render_template(
+                "add-game.html",
+                game_types=game_types,
+                player_cards=player_cards,
+                error="Please choose the date the game was played.",
+                selected_game_type_id=game_type_id,
+                played_at_value=played_at
+            )
+
+        players = []
+        ranking = 0
+
+        for position in range(1, len(player_cards) + 1):
+            player_name = request.form.get(
+                f"player_{position}_name",
+                ""
+            ).strip()
+
+            score_value = request.form.get(
+                f"player_{position}_score",
+                ""
+            ).strip()
+
+            not_played = request.form.get(
+                f"player_{position}_not_played"
+            )
+
+            if not player_name:
+                continue
+
+            if player_name not in allowed_player_names:
+                return render_template(
+                    "add-game.html",
+                    game_types=game_types,
+                    player_cards=player_cards,
+                    error="Unknown player submitted.",
+                    selected_game_type_id=game_type_id,
+                    played_at_value=played_at
+                )
+
+            if not_played:
+                continue
+
+            if score_value:
+                try:
+                    score = float(score_value)
+                except ValueError:
+                    return render_template(
+                        "add-game.html",
+                        game_types=game_types,
+                        player_cards=player_cards,
+                        error=f"Score for player {position} must be a number.",
+                        selected_game_type_id=game_type_id,
+                        played_at_value=played_at
+                    )
+            else:
+                score = None
+
+            ranking += 1
+
+            players.append({
+                "name": player_name,
+                "ranking": ranking,
+                "score": score
+            })
+
+        if not players:
+            return render_template(
+                "add-game.html",
+                game_types=game_types,
+                player_cards=player_cards,
+                error="Add at least one player before saving.",
+                selected_game_type_id=game_type_id,
+                played_at_value=played_at
+            )
+
+        create_game(
+            game_type_id=int(game_type_id),
+            played_at=played_at,
+            players=players
+        )
+
+        return redirect(url_for("index"))
+
+    return render_template(
+        "add-game.html",
+        game_types=game_types,
+        player_cards=player_cards,
+        selected_game_type_id="",
+        played_at_value=""
+    )
 
 
 @app.route("/logout")
