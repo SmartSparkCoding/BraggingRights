@@ -14,6 +14,10 @@ I used 2 types of AI in my project. The first and main one was ChatGPT. I used C
 
 The other AI I used was GitHub Copilot, but I ran out of token very quickly. But when I had tokens, it helped me with add-game! Although it broke, so I had to fix the issue manually.
 
+## What does the App Use
+
+It uses Flask, and SQLite DB, part of Flask. It also uses static HTML/CSS/JS for obviously the actual site. yeah thats it ig?
+
 ## License
 
 MIT License
