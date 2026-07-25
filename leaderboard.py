@@ -24,6 +24,15 @@ SUPPORTED_GOAL_TYPES = {
     "highest_average_score"
 }
 
+GOAL_NAME_TO_TYPE = {
+    "overall ranking": "overall_ranking",
+    "overall champion": "overall_ranking",
+    "most games played": "most_games",
+    "most first places": "most_first_places",
+    "highest average score": "highest_average_score",
+    "highest score": "highest_score"
+}
+
 def get_ranking_points(
         ranking,
         ranking_points=None
@@ -32,6 +41,22 @@ def get_ranking_points(
         ranking_points = DEFAULT_RANKING_POINTS
 
     return ranking_points.get(ranking, 0)
+
+
+def normalize_goal_type(goal):
+    goal_type = (goal["goal_type"] or "").strip()
+    goal_name = (goal["name"] or "").strip().lower()
+
+    if goal_type in SUPPORTED_GOAL_TYPES:
+        return goal_type
+
+    if goal_type in {"big", "small"}:
+        mapped_type = GOAL_NAME_TO_TYPE.get(goal_name)
+
+        if mapped_type:
+            return mapped_type
+
+    return goal_type
 
 def get_competition(
         competition_id
@@ -329,7 +354,7 @@ def calculate_goal(
         goal, 
         competition
 ):
-    goal_type = goal["goal_type"]
+    goal_type = normalize_goal_type(goal)
 
     if goal_type not in SUPPORTED_GOAL_TYPES:
         raise ValueError(

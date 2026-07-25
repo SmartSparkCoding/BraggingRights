@@ -86,6 +86,55 @@
         <button
           class="details-button"
           type="button"
+          onclick="toggleSection('current-competitions', this)"
+        >
+          <span> Current Competitions </span><span class="arrow"> ↓ </span>
+        </button>
+
+        <div id="current-competitions" class="expandable">
+          {% if current_competitions %} {% for competition_data in
+          current_competitions %}
+          <div class="competition-block">
+            <div class="competition-header">
+              <div>
+                <strong>{{ competition_data.competition.name }}</strong>
+                <span>
+                  {{ competition_data.competition.start_date }} → {{
+                  competition_data.competition.end_date }}
+                </span>
+              </div>
+            </div>
+
+            <div class="competition-prize-list">
+              {% for goal in competition_data.goals %}
+              <div class="competition-prize-item">
+                <div class="competition-prize-main">
+                  <strong>{{ goal.goal.name }}</strong>
+                  <span>{{ goal.goal.prize }}</span>
+                </div>
+
+                <div class="competition-prize-leader">
+                  <span>Currently leading</span>
+                  <strong>
+                    {% if goal.winners %} {{ goal.winners |
+                    map(attribute='player_name') | join(', ') }} {% else %} No
+                    leader yet {% endif %}
+                  </strong>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div class="empty-state">
+            <p>No competition is active right now.</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <button
+          class="details-button"
+          type="button"
           onclick="toggleSection('played-games', this)"
         >
           <span> Played Games </span><span class="arrow"> ↓ </span>

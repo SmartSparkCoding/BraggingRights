@@ -143,12 +143,9 @@
       {% endif %}
 
       <footer class="footer">
-        <button
-          class="login-button"
-          onclick="window.location.href='{{ url_for('profile_selector') }}'"
-        >
+        <a class="login-button" href="{{ url_for('profile_selector') }}">
           Log In
-        </button>
+        </a>
       </footer>
     </main>
   </body>

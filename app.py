@@ -29,7 +29,7 @@ from database import (
     get_active_competitions,
     add_competition_goal
 )
-from leaderboard import get_player_global_stats
+from leaderboard import get_player_global_stats, get_current_competition
 
 
 app = Flask(__name__)
@@ -907,6 +907,8 @@ def profile(profile_id):
         profile_data["name"]
     )
 
+    current_competitions = get_current_competition()
+
     return render_template(
         "profile.html",
         profile_id=profile_id,
@@ -915,6 +917,7 @@ def profile(profile_id):
         stats=get_home_stats(),
         recent_games=profile_stats["games"],
         game_stats=[],
+        current_competitions=current_competitions,
         blur_general_stats=should_blur_general_stats()
     )
 
