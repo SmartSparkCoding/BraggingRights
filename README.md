@@ -13,3 +13,27 @@ To run the app, you need to install the requirements found in requirements.txt, 
 I used 2 types of AI in my project. The first and main one was ChatGPT. I used ChatGPT to learn a lot about the routes, and databases simply because I don't know very much about databases and how this works. The only 'copy and pasted' code in this project is the admin stuff (and another file mentioned later) as this included a massive amount of POST / GET requests to the database and making sure that I am not just going to wipe the database.....
 
 The other AI I used was GitHub Copilot, but I ran out of token very quickly. But when I had tokens, it helped me with add-game! Although it broke, so I had to fix the issue manually.
+
+## License
+
+MIT License
+
+Copyright (c) 2026 Jacob Navaratne
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
